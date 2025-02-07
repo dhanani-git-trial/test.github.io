@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Phaser Mobile Jump Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; text-align: center; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+
+<script>
+    const config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 500 },
+                debug: false
+            }
+        },
+        scene: { preload, create, update }
+    };
+
+    let player, cursors;
+    let platforms;
+    let winZone, loseZone;
+    let leftButton, rightButton, jumpButton;
+    let moveLeft = false, moveRight = false;
+
+    const game = new Phaser.Game(config);
+
+    function preload() {
+        this.load.image('background', 'https://media-public.canva.com/hu0-w/MAF-ONhu0-w/1/tl.png');
+        this.load.image('player', 'https://media-public.canva.com/rtras/MAFtCNrtras/1/t.png');
+        this.load.image('platform', 'https://media-public.canva.com/oEi0c/MAGLA0oEi0c/1/tl.png');
+        this.load.image('winZone', 'https://media-public.canva.com/foCZ0/MAGCrCfoCZ0/1/t.png');
+        this.load.image('loseZone', 'https://media-public.canva.com/iDVd4/MAEonCiDVd4/1/tl.png');
+    }
+
+    function create() {
+        this.add.image(400, 300, 'background').setDisplaySize(800, 600);
+        platforms = this.physics.add.staticGroup();
+        platforms.create(100, 500, 'platform').setScale(0.3).refreshBody();
+        platforms.create(265, 500, 'platform').setScale(0.3).refreshBody();
+        platforms.create(430, 500, 'platform').setScale(0.3).refreshBody();
+        platforms.create(595, 500, 'platform').setScale(0.3).refreshBody();
+
+        player = this.physics.add.sprite(100, 450, 'player').setScale(0.25).setCollideWorldBounds(true);
+        this.physics.add.collider(player, platforms);
+
+        winZone = this.physics.add.staticSprite(700, 450, 'winZone').setScale(0.5);
+        loseZone = this.physics.add.staticSprite(270, 550, 'loseZone');
+
+        this.physics.add.collider(player, winZone, () => {
+            alert("You Win! 🎉");
+            location.reload();
+        });
+        this.physics.add.collider(player, loseZone, () => {
+            alert("Game Over! ❌");
+            location.reload();
+        });
+
+        cursors = this.input.keyboard.createCursorKeys();
+
+        leftButton = this.add.text(600, 550, ' ⮘ ', { fontSize: '60px', backgroundColor: 'blue', color: "green"})
+            .setInteractive()
+            .on('pointerdown', () => moveLeft = true)
+            .on('pointerup', () => moveLeft = false);
+        
+        rightButton = this.add.text(700, 550, ' ⮚ ', { fontSize: '60px', backgroundColor: '#ccc', color: "green",})
+            .setInteractive()
+            .on('pointerdown', () => moveRight = true)
+            .on('pointerup', () => moveRight = false);
+        
+        jumpButton = this.add.text(50, 550, '⮙', { fontSize: '48px', backgroundColor: '#ccc', color: "green"})
+            .setInteractive()
+            .on('pointerdown', () => {
+                if (player.body.touching.down) player.setVelocityY(-300);
+            });
+    }
+
+    function update() {
+        if (cursors.left.isDown || moveLeft) {
+            player.setVelocityX(-160);
+        } else if (cursors.right.isDown || moveRight) {
+            player.setVelocityX(160);
+        } else {
+            player.setVelocityX(0);
+        }
+
+        if (cursors.up.isDown && player.body.touching.down) {
+            player.setVelocityY(-300);
+        }
+    }
+</script>
+
+</body>
+</html>
